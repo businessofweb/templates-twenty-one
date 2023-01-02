@@ -2,7 +2,7 @@
 
                     </div>
                     {if !$inShoppingCart && $secondarySidebar->hasChildren()}
-                        <div class="d-md-none col-md-3 sidebar sidebar-secondary">
+                        <div class="d-lg-none sidebar sidebar-secondary">
                             {include file="$template/includes/sidebar.tpl" sidebar=$secondarySidebar}
                         </div>
                     {/if}
@@ -53,7 +53,7 @@
     <div id="fullpage-overlay" class="w-hidden">
         <div class="outer-wrapper">
             <div class="inner-wrapper">
-                <img src="{$WEB_ROOT}/assets/img/overlay-spinner.svg">
+                <img src="{$WEB_ROOT}/assets/img/overlay-spinner.svg" alt="">
                 <br>
                 <span class="msg"></span>
             </div>

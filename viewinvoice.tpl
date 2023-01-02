@@ -10,6 +10,7 @@
     <link href="{assetPath file='theme.min.css'}?v={$versionHash}" rel="stylesheet">
     <link href="{$WEB_ROOT}/assets/css/fontawesome-all.min.css" rel="stylesheet">
     <link href="{assetPath file='invoice.min.css'}?v={$versionHash}" rel="stylesheet">
+    <script>var whmcsBaseUrl = "{$WEB_ROOT}";</script>
     <script src="{assetPath file='scripts.min.js'}?v={$versionHash}"></script>
 
 </head>
@@ -141,9 +142,9 @@
             <br />
 
             {if $manualapplycredit}
-                <div class="card bg-success">
-                    <div class="card-header">
-                        <h3 class="card-title"><strong>{lang key='invoiceaddcreditapply'}</strong></h3>
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h3 class="card-subtitle"><strong>{lang key='invoiceaddcreditapply'}</strong></h3>
                     </div>
                     <div class="card-body">
                         <form method="post" action="{$smarty.server.PHP_SELF}?id={$invoiceid}">
@@ -264,12 +265,12 @@
 
     </div>
 
-    <p class="text-center d-print-none"><a href="clientarea.php?action=invoices">{lang key='invoicesbacktoclientarea'}</a></a></p>
+    <p class="text-center d-print-none"><a href="clientarea.php?action=invoices">{lang key='invoicesbacktoclientarea'}</a></p>
 
     <div id="fullpage-overlay" class="w-hidden">
         <div class="outer-wrapper">
             <div class="inner-wrapper">
-                <img src="{$WEB_ROOT}/assets/img/overlay-spinner.svg">
+                <img src="{$WEB_ROOT}/assets/img/overlay-spinner.svg" alt="">
                 <br>
                 <span class="msg"></span>
             </div>

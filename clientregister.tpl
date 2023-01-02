@@ -17,7 +17,7 @@
     });
 </script>
 {if $registrationDisabled}
-    {include file="$template/includes/alert.tpl" type="error" msg="{lang key='registerCreateAccount'}"|cat:' <strong><a href="cart.php" class="alert-link">'|cat:"{lang key='registerCreateAccountOrder'}"|cat:'</a></strong>'}
+    {include file="$template/includes/alert.tpl" type="error" msg="{lang key='registerCreateAccount'}"|cat:' <strong><a href="'|cat:"$WEB_ROOT"|cat:'/cart.php" class="alert-link">'|cat:"{lang key='registerCreateAccountOrder'}"|cat:'</a></strong>'}
 {/if}
 
 {if $errormessage}
@@ -34,7 +34,7 @@
                 {include file="$template/includes/linkedaccounts.tpl" linkContext="registration"}
 
                 <div class="card mb-4">
-                    <div class="card-body p-4">
+                    <div class="card-body p-4" id="personalInformation">
                         <h3 class="card-title">{lang key='orderForm.personalInformation'}</h3>
 
                         <div class="row">
@@ -164,14 +164,14 @@
 
                     <div class="card mb-4">
                         <div class="card-body p-4">
-                            <h3 class="card-title">{lang key='orderadditionalrequiredinfo'}</h3>
+                            <h3 class="card-title">{lang key='orderadditionalrequiredinfo'}<br><i><small>{lang key='orderForm.requiredField'}</small></i></h3>
 
                             <div class="row">
                                 {if $customfields}
                                     {foreach $customfields as $customfield}
                                         <div class="col-sm-6">
                                             <div class="form-group">
-                                                <label for="customfield{$customfield.id}">{$customfield.name}</label>
+                                                <label for="customfield{$customfield.id}">{$customfield.name} {$customfield.required}</label>
                                                 <div class="control">
                                                     {$customfield.input}
                                                 {if $customfield.description}
@@ -295,8 +295,8 @@
                 </p>
             {/if}
 
-            <p align="center">
-                <input class="btn btn-large btn-primary{$captcha->getButtonClass($captchaForm)}" type="submit" value="{lang key='clientregistertitle'}"/>
+            <p class="text-center">
+                <input class="btn btn-lg btn-primary{$captcha->getButtonClass($captchaForm)}" type="submit" value="{lang key='clientregistertitle'}"/>
             </p>
         </form>
     </div>

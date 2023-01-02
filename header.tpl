@@ -21,7 +21,7 @@
                                 <i class="far fa-flag"></i>
                                 {if count($clientAlerts) > 0}
                                     {count($clientAlerts)}
-                                    <span class="d-none d-sm-inline">Notifications</span>
+                                    <span class="d-none d-sm-inline">{lang key='notifications'}</span>
                                 {else}
                                     <span class="d-sm-none">0</span>
                                     <span class="d-none d-sm-inline">{lang key='nonotifications'}</span>
@@ -102,7 +102,7 @@
                     <li class="nav-item ml-3">
                         <a class="btn nav-link cart-btn" href="{$WEB_ROOT}/cart.php?a=view">
                             <i class="far fa-shopping-cart fa-fw"></i>
-                            <span class="badge badge-info">{$cartitemcount}</span>
+                            <span id="cartItemCount" class="badge badge-info">{$cartitemcount}</span>
                             <span class="sr-only">{lang key="carttitle"}</span>
                         </a>
                     </li>
@@ -146,6 +146,7 @@
         </div>
     </nav>
 
+    {include file="$template/includes/validateuser.tpl"}
     {include file="$template/includes/verifyemail.tpl"}
 
     {if $templatefile == 'homepage'}

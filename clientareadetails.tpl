@@ -6,6 +6,12 @@
     {include file="$template/includes/alert.tpl" type="error" errorshtml=$errormessage}
 {/if}
 
+{if in_array('state', $optionalFields)}
+    <script>
+        var stateNotRequired = true;
+    </script>
+{/if}
+
 <script type="text/javascript" src="{$BASE_PATH_JS}/StatesDropdown.js"></script>
 
 <form method="post" action="?action=details" role="form">
@@ -80,7 +86,7 @@
 
                     <div class="form-group">
                         <label for="inputPaymentMethod" class="col-form-label">{lang key='paymentmethod'}</label>
-                        <select name="paymentmethod" id="inputPaymentMethod" class="form-control">
+                        <select name="paymentmethod" id="inputPaymentMethod" class="form-control custom-select">
                             <option value="none">{lang key='paymentmethoddefault'}</option>
                             {foreach $paymentmethods as $method}
                             <option value="{$method.sysname}"{if $method.sysname eq $defaultpaymentmethod} selected="selected"{/if}>{$method.name}</option>
@@ -90,10 +96,22 @@
 
                     <div class="form-group">
                         <label for="inputBillingContact" class="col-form-label">{lang key='defaultbillingcontact'}</label>
-                        <select name="billingcid" id="inputBillingContact" class="form-control">
+                        <select name="billingcid" id="inputBillingContact" class="form-control custom-select">
                             <option value="0">{lang key='usedefaultcontact'}</option>
                             {foreach $contacts as $contact}
                             <option value="{$contact.id}"{if $contact.id eq $billingcid} selected="selected"{/if}>{$contact.name}</option>
+                            {/foreach}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inputLanguage" class="col-form-label">{lang key='clientarealanguage'}</label>
+                        <select name="accountLanguage" id="inputAccountLanguage" class="form-control custom-select"
+                            {if in_array('language', $uneditablefields)} disabled="disabled"{/if}>
+                            <option value="">{lang key='default'}</option>
+                            {foreach $languages as $language}
+                                <option value="{$language}"{if $language eq $clientLanguage} selected="selected"{/if}
+                                    >{$language|ucfirst}</option>
                             {/foreach}
                         </select>
                     </div>
@@ -133,7 +151,7 @@
                             <input type="hidden" name="email_preferences[{$emailType}]" value="0">
                             <input type="checkbox" class="form-check-input" name="email_preferences[{$emailType}]" id="{$emailType}Emails" value="1"{if $value} checked="checked"{/if} />
                             {lang key="emailPreferences."|cat:$emailType}
-                        </label>{if !($emailType@last)}<br />{/if}
+                        </label>{if !($value@last)}<br />{/if}
                     {/foreach}
                 </div>
             </div>

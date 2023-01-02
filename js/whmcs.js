@@ -10,6 +10,10 @@ jQuery(document).ready(function() {
     // when the page loads
     autoCollapse('#nav', 30);
 
+    if (jQuery('#lightbox').length === 0) {
+        lightbox.init();
+    }
+
     // when the window is resized
     jQuery(window).on('resize', function () {
         if (jQuery('button[data-target="#mainNavbar"], button[data-toggle="collapse"]').is(':visible')) {
@@ -119,7 +123,7 @@ jQuery(document).ready(function() {
     if (!internalSelectionDisabled) {
         if (jQuery(location).attr('hash').substr(1) !== "") {
             var activeTab = jQuery(location).attr('hash');
-            jQuery(".tab-pane").removeClass('active');
+            jQuery(".primary-content > .tab-content > .tab-pane").removeClass('active');
             jQuery(activeTab).removeClass('fade').addClass('active');
             jQuery(".list-group-tab-nav a").removeClass('active');
             jQuery('a[href="' + activeTab + '"]').addClass('active');
@@ -330,15 +334,16 @@ jQuery(document).ready(function() {
         }
 
         button.attr('disabled', 'disabled').addClass('disabled');
-        button.find('.loading').show().end();
+        jQuery('.loading', button).show().end();
+        jQuery('.login-feedback', form).slideUp();
         WHMCS.http.jqClient.post(
             url,
             form.serialize(),
             function (data) {
-                button.find('.loading').hide().end().removeAttr('disabled');
-                form.find('.login-feedback').html('');
+                jQuery('.loading', button).hide().end().removeAttr('disabled');
+                jQuery('.login-feedback', form).html('');
                 if (data.error) {
-                    form.find('.login-feedback').html(data.error).slideDown();
+                    jQuery('.login-feedback', form).hide().html(data.error).slideDown();
                 }
                 if (data.redirect !== undefined && data.redirect.substr(0, 7) === 'window|') {
                     window.open(data.redirect.substr(7), '_blank');
@@ -486,9 +491,9 @@ jQuery(document).ready(function() {
                     parsedContent;
 
                 jQuery.ajax({
-                    url: 'clientarea.php',
+                    url: WHMCS.utils.getRouteUrl('/clientarea/message/preview'),
                     async: false,
-                    data: {token: csrfToken, action: 'parseMarkdown', content: originalContent},
+                    data: {token: csrfToken, content: originalContent},
                     dataType: 'json',
                     success: function (data) {
                         parsedContent = data;
@@ -556,10 +561,24 @@ jQuery(document).ready(function() {
         e.preventDefault();
         WHMCS.http.jqClient.post(jQuery(this).data('uri'),
             {
-                'token': csrfToken,
+                'token': csrfToken
             });
-        jQuery('.email-verification').hide();
+        jQuery('.verification-banner.email-verification').hide();
     });
+    jQuery('#btnUserValidationClose').click(function(e) {
+        e.preventDefault();
+        WHMCS.http.jqClient.post(jQuery(this).data('uri'),
+            {
+                'token': csrfToken
+            });
+        jQuery('.verification-banner.user-validation').hide();
+    });
+
+    var ssoDropdown = jQuery('#servicesPanel').find('.list-group');
+    if (parseInt(ssoDropdown.css('height'), 10) < parseInt(ssoDropdown.css('max-height'), 10)) {
+        ssoDropdown.css('overflow', 'unset');
+    }
+
 
     /**
      * Parse the content to populate the markdown editor footer.
@@ -847,6 +866,62 @@ jQuery(document).ready(function() {
         confirmationModal.modal('toggle');
     });
     hideOverlay();
+
+    jQuery('input[name="approval_method"]').on('ifChecked', function(event) {
+        var fileMethod = $('#containerApprovalMethodFile'),
+            emailMethod = $('#containerApprovalMethodEmail'),
+            dnsMethod = $('#containerApprovalMethodDns');
+        if (jQuery(this).attr('value') == 'file') {
+            fileMethod.show();
+            dnsMethod.hide();
+            emailMethod.hide();
+        } else if (jQuery(this).attr('value') == 'dns-txt-token') {
+            dnsMethod.show();
+            fileMethod.hide();
+            emailMethod.hide();
+        } else {
+            fileMethod.hide();
+            dnsMethod.hide();
+            emailMethod.show();
+        }
+    });
+
+    (function () {
+        jQuery('.div-service-status').css(
+            'width',
+            (jQuery('.div-service-status .label-placeholder').outerWidth() + 5)
+        );
+        jQuery('div[menuitemname="Active Products/Services"] .list-group-item:visible')
+            .last()
+            .css('border-bottom', '1px solid #ddd');
+    }());
+    jQuery('div[menuitemname="Active Products/Services"] .btn-view-more').on('click', function(event) {
+        var hiddenItems = jQuery('div[menuitemname="Active Products/Services"] .list-group-item:hidden');
+        var itemAmount = 8;
+        event.preventDefault();
+        hiddenItems.slice(0,itemAmount).css('display', 'block');
+        if ((hiddenItems.length - itemAmount) <= 0) {
+            jQuery(event.target).addClass('disabled').attr("aria-disabled", true);
+        }
+        jQuery('div[menuitemname="Active Products/Services"] .list-group-item:visible')
+            .css('border-bottom', '')
+            .last()
+            .css('border-bottom', '1px solid #ddd');
+    })
+    jQuery('div[menuitemname="Service Details Actions"] a[data-identifier][data-serviceid][data-active="1"]').on('click', function(event) {
+        return customActionAjaxCall(event, jQuery(event.target))
+    });
+    jQuery('.div-service-item').on('click', function (event) {
+        var element = jQuery(event.target);
+        if (element.is('.dropdown-toggle, .dropdown-menu')) {
+            return true;
+        }
+        if (element.hasClass('btn-custom-action')) {
+            return customActionAjaxCall(event, element);
+        }
+        window.location.href = element.closest('.div-service-item').data('href');
+        return false;
+    });
 });
 
 /**
@@ -1062,14 +1137,23 @@ function hideNewBillingAddressFields() {
  * Show new credit card input fields.
  */
 function showNewCardInputFields() {
-    var ccDetails = jQuery('.cc-details').parent('div');
-    if (ccDetails.not(':visible')) {
-        ccDetails.slideDown();
-    }
+    var ccDetails = jQuery('.cc-details'),
+        ccNumber = jQuery('#inputCardNumber'),
+        billAddress = jQuery('#billingAddressChoice'),
+        container;
 
-    jQuery("#billingAddressChoice")
-        .parent('div')
-        .slideDown()
+    container = ccDetails.parent('div');
+    if (container.not(':visible')) {
+        container.show();
+    }
+    jQuery('.cc-details').slideDown();
+    ccNumber.focus();
+
+    container = billAddress.parent('div');
+    if (container.not(':visible')) {
+        container.show();
+    }
+    billAddress.slideDown()
         .find('input[name="billingcontact"]')
         .first()
         .iCheck('check');
@@ -1104,6 +1188,7 @@ function hideNewCardInputFields() {
         jQuery('#billingAddressChoice label.billing-contact-' + contactId)
             .iCheck('check');
     }
+    jQuery('#inputCardCvv').focus();
 }
 
 /**
@@ -1223,6 +1308,38 @@ function addTwitterWidgetObserverWhenNodeAvailable() {
     observerTwitterWidget.observe(targetTimelineTweets, observerConfig);
 }
 
+function openValidationSubmitModal(caller)
+{
+    var validationSubmitModal = jQuery('#validationSubmitModal');
+    validationSubmitModal.find('.modal-body iframe').attr('src', caller.dataset.url);
+    validationSubmitModal.modal('show');
+}
+
+function completeValidationComClientWorkflow()
+{
+    var submitDocsRequestBanner = jQuery('.user-validation'),
+        secondarySidebarStatus = jQuery('.validation-status-label'),
+        submitDiv = jQuery('.validation-submit-div'),
+        redirectUser = true;
+
+    $('#validationSubmitModal').modal('hide');
+    if (submitDocsRequestBanner.length !== 0) {
+        submitDocsRequestBanner.slideUp();
+        redirectUser = false;
+    }
+    if (secondarySidebarStatus.length !== 0) {
+        var submitString = submitDiv.find('a').data('submitted-string');
+        secondarySidebarStatus.text(submitString).removeClass('label-default').addClass('label-warning');
+        submitDiv.hide();
+        redirectUser = false;
+    }
+
+    if (redirectUser) {
+        window.location.href = WHMCS.utils.autoDetermineBaseUrl();
+    }
+    return false;
+}
+
 var autoCollapse = function (menu, maxHeight) {
 
     var continueLoop = true,
@@ -1270,4 +1387,46 @@ var autoCollapse = function (menu, maxHeight) {
             autoCollapse(menu, maxHeight);
         }
     }
+}
+
+/**
+ * Perform the AjaxCall for a CustomAction.
+ *
+ * @param event
+ * @param element
+ * @returns {boolean}
+ */
+function customActionAjaxCall(event, element) {
+    event.stopPropagation();
+    if (!element.data('active')) {
+        return false;
+    }
+    element.attr('disabled', 'disabled').addClass('disabled');
+    jQuery('.loading', element).show();
+    WHMCS.http.jqClient.jsonPost({
+        url: WHMCS.utils.getRouteUrl(
+            '/clientarea/service/' + element.data('serviceid') + '/custom-action/' + element.data('identifier')
+        ),
+        data: {
+            'token': csrfToken
+        },
+        success: function(data) {
+            if (data.success) {
+                window.open(data.redirectTo);
+            } else {
+                window.open('clientarea.php?action=productdetails&id=' + element.data('serviceid') + '&customaction_error=1');
+            }
+        },
+        fail: function () {
+            window.open('clientarea.php?action=productdetails&id=' + element.data('serviceid') + '&customaction_ajax_error=1');
+        },
+        always: function() {
+            jQuery('.loading', element).hide();
+            element.removeAttr('disabled').removeClass('disabled');
+            if (element.hasClass('dropdown-item')) {
+                element.closest('.dropdown-menu').removeClass('show');
+            }
+        },
+    });
+    return true;
 }

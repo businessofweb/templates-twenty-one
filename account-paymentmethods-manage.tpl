@@ -286,7 +286,7 @@
 
                             <div class="form-group">
                                 <label class="control-label" for="inputCountry">{lang key='clientareacountry'}</label>
-                                <select class="form-control" name="country" id="inputCountry">
+                                <select class="form-control custom-select" name="country" id="inputCountry">
                                     {foreach $countries as $countryCode => $countryName}
                                         <option value="{$countryCode}"{if ($countryCode == $clientCountry)} selected="selected"{/if}>
                                             {$countryName}
@@ -412,9 +412,13 @@
                             setTimeout("autoSubmitFormByContainer('tokenGatewayRemoteInputOutput')", 1000);
                             jQuery('.fieldgroup-remoteinput').show();
                         } else if (response.assistedOutput) {
-                            jQuery('.fieldgroup-creditcard').show('fast', function() {
+                            jQuery('.fieldgroup-creditcard').show('fast', function () {
                                 jQuery('#tokenGatewayAssistedOutput').html(response.assistedOutput);
                             });
+                            jQuery('.fieldgroup-auxfields').show();
+                        } else if (response.gatewayType === 'Bank') {
+                            jQuery('.fieldgroup-loading').hide();
+                            jQuery('.fieldgroup-bankaccount').show();
                             jQuery('.fieldgroup-auxfields').show();
                         } else {
                             jQuery('.fieldgroup-creditcard').show();
